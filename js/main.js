@@ -9,30 +9,6 @@ const PROFILE = {
   photo: null // Example: "assets/images/bruno-rocha.webp"
 };
 
-const PROJECTS = {
-  wishlist: { github: null, demo: null, architecture: null },
-  access: { github: null, demo: null, architecture: null },
-  orders: { github: null, demo: null, architecture: null }
-};
-
-const ARCHITECTURES = {
-  wishlist: {
-    title: "Smart Wishlist",
-    description: "A proposed workflow for scheduled product monitoring and price-drop notifications.",
-    flow: [".NET API — products and wishlist", "Scheduled jobs — trigger price checks", "Background worker — fetch prices from external APIs", "PostgreSQL — products and price history", "Notifications — report price drops"]
-  },
-  access: {
-    title: "Building Access Management",
-    description: "A proposed structure for visitor management, delivery registration, entry and exit tracking, searchable history, notifications, and a dashboard.",
-    flow: ["JavaScript dashboard — concierge operations", ".NET API — visitors, residents, and deliveries", "PostgreSQL — searchable entry and exit records", "Notifications — delivery and visitor updates", "Docker — application packaging"]
-  },
-  orders: {
-    title: "Distributed Order Processing",
-    description: "A demonstration architecture connecting order intake to asynchronous processing, with MassTransit orchestrating messaging.",
-    flow: ["Client — submit an order", ".NET API — accept the request", "RabbitMQ / MassTransit — publish and consume messages", "Worker — process orders asynchronously", "Redis — cache processing state", "PostgreSQL — persist order records"]
-  }
-};
-
 function configureLink(link, value, type) {
   if (!value) {
     link.title = translate("Link not available yet");
@@ -51,9 +27,6 @@ function configureLink(link, value, type) {
 document.querySelectorAll("[data-profile]").forEach(link => {
   const type = link.dataset.profile;
   configureLink(link, PROFILE[type], type);
-});
-document.querySelectorAll("a[data-project]").forEach(link => {
-  configureLink(link, PROJECTS[link.dataset.project][link.dataset.link]);
 });
 
 if (PROFILE.photo) {
@@ -138,37 +111,4 @@ if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-mot
   });
 }
 
-const dialog = document.querySelector("#architecture-dialog");
-let activeArchitecture = null;
-function renderArchitecture(key) {
-  const architecture = ARCHITECTURES[key];
-  document.querySelector("#architecture-title").textContent = translate(architecture.title);
-  document.querySelector("#architecture-description").textContent = translate(architecture.description);
-  document.querySelector("#architecture-flow").replaceChildren(...architecture.flow.map(step => {
-    const item = document.createElement("li");
-    item.textContent = translate(step);
-    return item;
-  }));
-}
-document.addEventListener("languagechange", () => {
-  if (dialog.open && activeArchitecture) renderArchitecture(activeArchitecture);
-  requestAnimationFrame(updateScrollState);
-});
-document.querySelectorAll("[data-architecture]").forEach(button => {
-  button.addEventListener("click", () => {
-    const key = button.dataset.architecture;
-    const url = PROJECTS[key].architecture;
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    activeArchitecture = key;
-    renderArchitecture(key);
-    dialog.showModal();
-  });
-});
-document.querySelector("#close-dialog").addEventListener("click", () => dialog.close());
-dialog.addEventListener("click", event => {
-  const bounds = dialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
-});
+document.addEventListener("languagechange", () => requestAnimationFrame(updateScrollState));
